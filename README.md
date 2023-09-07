@@ -6,7 +6,13 @@
 所有分支目录组织结构统一。
 
 #### 软件架构
-软件架构说明
+利用Gitee镜像管理功能，配置Gitee、GitHub双向同步。
+
+每次推送到Gitee，本架构可自动备份至Github。
+
+[Gitee笔记入口](https://gitee.com/ojiejieo/starter-notes.git)
+
+[GitHub笔记入口](https://github.com/0jiejie0/starter-notes.git)
 
 
 #### 安装教程
