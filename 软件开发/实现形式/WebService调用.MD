@@ -21,6 +21,19 @@
 /**
  * 发送数据到指定接口
  * url: http://www.webxml.com.cn/WebServices/WeatherWebService.asmx
+ * param: <![CDATA[
+ <nebulaData regID="3a6ea7084d1" userID="test">
+ <data type="Opt">
+ <row>
+ <col gb="" hosp="DOC_NO">23716</col>
+ <col gb="" hosp="GENDER_CODE">1</col>
+ <col gb="" hosp="CREATE_CODE">1234</col>
+ <col gb="" hosp="CREATE_DATE">2025-10-30 13:59:49</col>
+ <col gb="" hosp="MODIFY_DATE">2025-10-30 13:59:49</col>
+ </row>
+ </data>
+ </nebulaData>
+ ]]>
  */
 private static void send(String url,String param){
     new Thread(()->{
@@ -49,4 +62,23 @@ private static void send(String url,String param){
     }).start();
 }
 ```
-本用法参照文章：、
+本用法参照文章：[Java使用Hutool调用WebService接口详解](https://blog.csdn.net/zpwvip/article/details/127487596#三、示例)。
+
+    注意：此处形参param中末尾拼接两个右方括号]]在实际使用时会报错，实际测试中只拼写一个，在创建SoapClient后打印其参数就正常不会报错了。
+
+#### 参数拼接
+拼接形参param的示例代码如下：
+
+```java
+private static String packingWebService(String userId, String type, String colsAndData){
+    StringBuilder ans=new StringBuilder();
+    ans.append("<![CDATA[\n");
+    ans.append("<nebulaData regID=\"3a6ea7084d1\" userID=\"").append(userId).append("\">\n");
+    ans.append("  <data type=\"").append(type).append("\">\n");
+    ans.append(colsAndData);
+    ans.append("  </data>\n");
+    ans.append("</nebulaData>\n");
+    ans.append("]>\n");
+    return ans.toString();
+}
+```
