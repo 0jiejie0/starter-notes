@@ -13,7 +13,7 @@
 
 ## 问题描述
 
-    以下过程依次执行，但并不是一次性发现了这些现象
+    以下过程依次执行，但并不是一次调试过程，不是一次性发现了这些现象
 
 1. 记录有问题的请求数据，用idea打开表，筛选到目标数据。
 2. IDEA调试模式运行，在某行修改数据的代码打了一个断点，发请求进入断点。
@@ -31,8 +31,54 @@
 
 反复执行调试过程，不难发现是在执行修改代码后，才会出现各种稀奇的现象。
 猜测是为保证事务完整性，修改数据后给数据库加了锁。
-而这个锁，由于[MySQL的事务隔离级别默认是可重复读](../../数据库/MySQL/事务/事务的特性和隔离级别.MD#可重复读repeatable-read)，所以用的是行级锁。
+而这个锁，由于[MySQL的事务隔离级别默认是可重复读](../../数据库/MySQL/事务/事务的特性和隔离级别.MD#可重复读repeatable-read)
+，所以用的是行级锁。
 调试时尝试修改别行数据，发现确实可以修改。
+
+但是，如果这里有锁的话，这个锁是加在索引上的，不是在数据上。然而昨天学习了下MVCC，推测这也可能不是锁机制，而是可重复读的快照读搞的鬼。
+
+快照读有一个限制条件，那就是在一个事务中。idea这里数次查询表究竟是不是一个事务不好搜集资料，但可以实验证明锁的存在性：
+调试时，在程序修改数据之前，手动筛选数据，然后单步执行让程序修改数据，然后再次筛选查询发现数据无变化。
+如果这手动操作都是在一个事务中，第二次查询用的就是快照读，然后，我手动更新一条别行的数据，就能触发当前读，我再一次筛选应该就会看到刚刚程序修改的结果。
+
+如果手动更新后看不到程序修改的结果，这不能说明手动查询不在一个事务，但能说明程序对数据的修改未完全提交到数据库，因而可能有锁的存在。
+如果手动更新能看到程序结果，才能说明手动查询是在一个事务中，同时证明此处无锁。
+
+实验结果:
+
+~~首次实验（失败），
+过程不规范，发出请求进入断点后，手动修改了一下数据（因为忘了先把数据改成非目标数据），
+然后打开计算器执行代码，手动刷新，数据无变化，单步执行代码，数据无变化，查看日志，发现修改行数为0，f9放行代码，发现响应为失败。手动查询，数据无变化。~~
+
+~~再次实验（失败），
+手动刷新数据，重发请求进入断点，单步执行，发现数据无变化，放行代码，数据无变化。屏蔽断点，多次请求，数据无变化。检查数据，数据无问题。~~
+
+~~这似乎说明手动窗口和一次请求处理都是一个事务？关闭手动查表窗口，重新打开，筛选、搜索，查看数据是上次的数据。
+重新请求进入断点（失败），发现数据还是没有变化，没有结果。~~ 突然发现程序运行和手动查询用的不是一个数据库，至此所有实验破产。
+
+发送请求进入断点，手动筛选、修改数据成功，计算器执行修改语句成功1行，手动查询 数据无变化，手动修改目标行对应列数据 提交缓慢、失败，idea提示：
+
+```log
+java.sql.SQLException: Lock wait timeout exceeded; try restarting transaction at com.mysql.cj.jdbc.exceptions.SQLError.createSQLException(SQLError.java:123) at com.mysql.cj.jdbc.exceptions.SQLExceptionsMapping.translateException(SQLExceptionsMapping.java:122) at com.mysql.cj.jdbc.ClientPreparedStatement.executeInternal(ClientPreparedStatement.java:953) at com.mysql.cj.jdbc.ClientPreparedStatement.executeUpdateInternal(ClientPreparedStatement.java:1092) at com.mysql.cj.jdbc.ClientPreparedStatement.executeUpdateInternal(ClientPreparedStatement.java:1040) at com.mysql.cj.jdbc.ClientPreparedStatement.executeLargeUpdate(ClientPreparedStatement.java:1348) at com.mysql.cj.jdbc.ClientPreparedStatement.executeUpdate(ClientPreparedStatement.java:1025) in RemotePreparedStatementImpl.executeUpdate(RemotePreparedStatementImpl.java:293)
+```
+
+刷新数据放弃修改，目标行数据无变化，
+手动修改相邻行对应列数据，无法提交，提示同上，刷新，
+手动修改目标行无关列数据，无法提交，提示同上，刷新，
+手动修改相邻行无关列数据，无法提交，提示同上，刷新，
+手动修改任意行无关列数据，提交成功，重新筛选，目标行数据无变化，无法修改同一筛选条件下的相邻行无关列（刚刚修改成功的列）。
+单步执行修改数据代码，成功1行，手动查询数据无变化，
+放行代码，手动查询出现目标数据，手动修改目标行成功。
+
+手动修改任意行后查询无结果，再看错误提示，证明确实是加锁了。筛选下相邻行不能修改，说明确实是在索引加锁了，且条件较强。
+重新调试，单步修改后，修改任意行对应列数据，提交成功，重新筛选，目标数据无变化，
+仅指定其中一个筛选条件（目标行用三个条件定位），任意数据无法修改，
+切换筛选条件，发现可以修改，查看表定义，该列无独立索引，
+切换筛选条件，无法修改，查看表定义，该列有独立索引。
+
+综上，调试过程中，和目标行相关的所有符合条件的索引，即便是仅满足其中一个条件，也会对该行加锁。
+
+[//]: # (todo 挖坑：索引、锁)
 
 ## 解决方案
 
