@@ -108,3 +108,5 @@ JDK 1.1 = 45
 项目打包完成后，部署到服务器上还是有个类报错，从原包中找出对应的class，替换到新包中，不再报错。我下载的是7u51，猜测版本还是没有完全对应。
 
 [关于涉及jdk等版本的其他问题，可看这篇博客](https://blog.csdn.net/qq_41623592/article/details/132036580)
+
+本文从[CSDN](https://blog.csdn.net/qq_41623592/article/details/132362205)迁移。
