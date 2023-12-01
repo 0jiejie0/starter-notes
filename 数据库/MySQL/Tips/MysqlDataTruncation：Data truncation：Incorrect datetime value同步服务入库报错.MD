@@ -59,7 +59,7 @@ com.mysql.jdbc.MysqlDataTruncation: Data truncation: Incorrect datetime value: '
 			Date oriDate = dateFormat.parse(oriTimeStr);
 			Date minDate = dateFormat.parse("1000-01-01 00:00:00");
 			Date maxDate = dateFormat.parse("9999-12-31 23:59:59");
-			if ((l = oriDate.compareTo(minDate) < 0) || !(l = oriDate.compareTo(maxDate) < 0)) {
+			if ((l = oriDate.before(minDate)) || !(l = oriDate.before(maxDate))) {
 				return dateFormat.format(l ? minDate : maxDate);
 			}
 		} catch (Exception e) {
