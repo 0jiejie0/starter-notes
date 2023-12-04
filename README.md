@@ -23,6 +23,8 @@
 
 [GitHub笔记入口](https://github.com/0jiejie0/starter-notes.git)
 
+前期部分笔记在[CSDN](https://blog.csdn.net/qq_41623592)，用到时会向本项目迁移。
+
 #### 配置教程
 
 参照；[gitee和github在线双备](./文件管理/Git版本控制/gitee和github在线远程库双备，双向同步，镜像备份.MD)
