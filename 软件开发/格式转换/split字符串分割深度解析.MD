@@ -30,6 +30,7 @@
 
 ## 分析
 看上边的测试结果，看起来是split会舍弃右边的空字符串，应该是Java的鬼。查看源码，发现这个方法调用了`split(regex, 0)`：
+
 ```java
     /**
      * Splits this string around matches of the given
@@ -138,42 +139,88 @@
             // 实际上是指仅一个分隔符的情况，和上方的英文源码注释同义
             int off = 0;
             int next = 0;
-            boolean limited = limit > 0;
+            boolean limited = limit > 0; // 看到这里就能明白，为什么0和负数都不会限制数组长度了
             ArrayList<String> list = new ArrayList<>();
-            while ((next = indexOf(ch, off)) != -1) {
-                if (!limited || list.size() < limit - 1) {
-                    list.add(substring(off, next));
-                    off = next + 1;
-                } else {    // last one
+            while ((next = indexOf(ch, off)) != -1) { // next定位到每个分隔符，循环执行到待切串最后一个分隔符
+                if (!limited || list.size() < limit - 1) { // 如果无数组长度限制或不是限制长度下的最后一个元素
+                    list.add(substring(off, next)); // substring 原理见下
+                    off = next + 1; // 截取字符串，把指针挪动到当前位置
+                } else {    // last one // 限制数组长度情况下，最末元素（同这个英文单词，又同下释代码）
                     //assert (list.size() == limit - 1);
-                    list.add(substring(off, value.length));
-                    off = value.length;
+                    list.add(substring(off, value.length)); // 截取剩余串，作为最末元素
+                    off = value.length; // 指针标记结束，标志所有串切割完成（不缩短长度的情况下，上个if内无法处理最末元素，因为最末元素没有分隔符不满足循环条件，也就不能完成切割）
                     break;
                 }
             }
-            // If no match was found, return this
+            // If no match was found, return this // 无分隔符
             if (off == 0)
                 return new String[]{this};
 
-            // Add remaining segment
+            // Add remaining segment // 补充 不限制长度的情况下 或 限制长度和应截长度相等的情况下 的，最末元素（因为上个循环控制条件时有无分隔符，无法处理不含分隔符的最末元素）。
             if (!limited || list.size() < limit)
                 list.add(substring(off, value.length));
 
-            // Construct result
+            // Construct result // 返回值生成
             int resultSize = list.size();
-            if (limit == 0) {
+            if (limit == 0) { // 仅在0 不限制结果长度的情况下，用指针标记非空串末尾
                 while (resultSize > 0 && list.get(resultSize - 1).length() == 0) {
-                    resultSize--;
+                    resultSize--; // 数组末尾指针位置为空串时，指针前移，这是本篇笔记的缘由
                 }
             }
-            String[] result = new String[resultSize];
+            String[] result = new String[resultSize]; // 列表截取结果放到此数组中
             return list.subList(0, resultSize).toArray(result);
         }
         return Pattern.compile(regex).split(this, limit);
     }
 ```
+
 在源码方法注释的第四段中，最后一句话就说明了这一点，方法会丢弃后面的空字符串。ai助手解释说这可以简化对返回结果的处理。
 例如：`"apple,banana,orange,"`，丢弃最后的空字符串可以避免对空字符串作单独的逻辑判断（这说明以后再用时，可以放心地往后写分隔符）。
+
+其中调用的substring()方法，底层调用了String(char value[], int offset, int count)，其源码行数不多，但有点费解：
+
+```java
+    /**
+     * Allocates a new {@code String} that contains characters from a subarray
+     * of the character array argument. The {@code offset} argument is the
+     * index of the first character of the subarray and the {@code count}
+     * argument specifies the length of the subarray. The contents of the
+     * subarray are copied; subsequent modification of the character array does
+     * not affect the newly created string.
+     *
+     * @param  value
+     *         Array that is the source of characters
+     *
+     * @param  offset
+     *         The initial offset
+     *
+     * @param  count
+     *         The length
+     *
+     * @throws  IndexOutOfBoundsException
+     *          If the {@code offset} and {@code count} arguments index
+     *          characters outside the bounds of the {@code value} array
+     */
+    public String(char value[], int offset, int count) {
+        if (offset < 0) {
+            throw new StringIndexOutOfBoundsException(offset);
+        }
+        if (count <= 0) {
+            if (count < 0) {
+                throw new StringIndexOutOfBoundsException(count);
+            }
+            if (offset <= value.length) {
+                this.value = "".value;
+                return;
+            }
+        }
+        // Note: offset or count might be near -1>>>1.
+        if (offset > value.length - count) {
+            throw new StringIndexOutOfBoundsException(offset + count);
+        }
+        this.value = Arrays.copyOfRange(value, offset, offset+count);
+    }
+```
 
 ## 用例说明
 
