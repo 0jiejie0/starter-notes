@@ -23,11 +23,58 @@
 
 ### UbuntuServer安装及初始化过程
 
-1. 在虚拟机内安装不用考虑分区问题，网络会自动检测DHCP，但是为了以后连接方便还是建议用固定IP
+1. 在虚拟机内安装不用考虑分区问题，网络会自动检测DHCP，但是为了以后连接方便还是建议用固定IP，已经启用DHCP的，进行如下操作可设置固定IP：
+
+```shell
+$ ip addr # 找到网卡enp0s3（后缀会有变化，enp打头的就是），本机IP 10.0.2.15/24
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host
+       valid_lft forever preferred_lft forever
+2: enp0s3: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether 08:00:27:59:7f:0f brd ff:ff:ff:ff:ff:ff
+    inet 10.0.2.15/24 brd 10.0.2.255 scope global dynamic enp0s3
+       valid_lft 467sec preferred_lft 467sec
+    inet6 fe80::a00:27ff:fe59:7f0f/64 scope link
+       valid_lft forever preferred_lft forever
+$ ip route show # 查看网关IP 10.0.2.1
+default via 10.0.2.1 dev enp0s3 proto dhcp src 10.0.2.15 metric 100
+10.0.2.0/24 dev enp0s3 proto kernel scope link src 10.0.2.15
+10.0.2.1 dev enp0s3 proto dhcp scope link src 10.0.2.15 metric 100
+$ sudo cp /etc/netplan/00-installer-config.yaml /etc/netplan/00-installer-config.yaml.2023-11.bak # 备份网络配置文件
+$ sudo vim /etc/netplan/00-installer-config.yaml # 编辑网络配置,文件内容如下：
+# This is the network config written by 'subiquity'
+network:
+  ethernets:
+    enp0s3:
+      dhcp4: true
+  version: 2
+# 可以看到，enp0s3的DHCP是开启状态，需要改成下面的内容：
+network:  
+  ethernets:    
+    ens33:      
+      dhcp4: no      
+      addresses: [10.0.2.15/24]   #设置本机IP及掩码      
+      optional: true      
+      gateway4: 10.0.2.1   #设置网关（ipv4 dns服务器）      
+      nameservers:        
+        addresses: [114.114.114.114, 8.8.8.8]   #设置DNS  
+  version: 2
+$ sudo netplan apply # 应用配置
+$ sudo systemctl restart systemd-networkd # 重启网络服务
+```
+
+[//]: # (todo 暂时不知道上边这两条命令好不好使，也有只说明到倒二，没有最后这条命令的，都执行了，有问题再说)
+
 2. 安装程序最后有选择初始化安装程序的步骤，按空格选择需要用的程序（但是似乎不太好用，我勾选docker安装完以后，docker命令没有），其余一般用默认选项即可
-3. 启动系统输入密码发现系统时间不对，用如下命令修改时区（参考链接：[ubuntu上修改时区的两种方法](https://blog.csdn.net/kaka_buka/article/details/131540461)）：
-   ```Bash
-   timedatectl  # 查看当前设置
-   sudo timedatectl set-timezone Asia/Shanghai
-   timedatectl  # 查看设置结果
-   ```
+3. 启动系统输入密码发现系统时间不对
+
+用如下命令修改时区（参考链接：[ubuntu上修改时区的两种方法](https://blog.csdn.net/kaka_buka/article/details/131540461)）：
+
+```Bash
+timedatectl  # 查看当前设置
+sudo timedatectl set-timezone Asia/Shanghai
+timedatectl  # 查看设置结果
+```
