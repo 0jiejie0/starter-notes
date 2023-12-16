@@ -66,6 +66,10 @@ $ sudo netplan apply # 应用配置
 $ sudo systemctl restart systemd-networkd # 重启网络服务
 ```
 
+搜素：[ubuntu dhcp 固定IP](https://www.baidu.com/s?wd=ubuntu+dhcp+%E5%9B%BA%E5%AE%9AIP&ie=UTF-8&tn=62095104_26_oem_dg)，
+参考：[CSDN](https://blog.csdn.net/WwwALlll/article/details/133280034)、
+[百度](https://baijiahao.baidu.com/s?id=1774340357193047656&wfr=spider&for=pc)
+
 [//]: # (todo 暂时不知道上边这两条命令好不好使，也有只说明到倒二，没有最后这条命令的，都执行了，有问题再说)
 
 2. 安装程序最后有选择初始化安装程序的步骤，按空格选择需要用的程序（但是似乎不太好用，我勾选docker安装完以后，docker命令没有），其余一般用默认选项即可
@@ -78,3 +82,64 @@ timedatectl  # 查看当前设置
 sudo timedatectl set-timezone Asia/Shanghai
 timedatectl  # 查看设置结果
 ```
+
+### docker 安装
+
+#### 更新源
+
+各种源；
+
+```shell
+#阿里云源
+deb http://mirrors.aliyun.com/ubuntu/ bionic main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ bionic-security main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ bionic-updates main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ bionic-backports main restricted universe multiverse
+#測試版源
+deb http://mirrors.aliyun.com/ubuntu/ bionic-proposed main restricted universe multiverse
+#源碼
+deb-src http://mirrors.aliyun.com/ubuntu/ bionic main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ bionic-security main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ bionic-updates main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ bionic-backports main restricted universe multiverse
+#測試版源
+deb-src http://mirrors.aliyun.com/ubuntu/ bionic-proposed main restricted universe multiverse
+#清华大学源
+deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic main restricted universe multiverse
+deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-security main restricted universe multiverse
+deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-updates main restricted universe multiverse
+deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-backports main restricted universe multiverse
+#測試版源
+deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-proposed main restricted universe multiverse
+#源碼
+deb-src http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic main restricted universe multiverse
+deb-src http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-security main restricted universe multiverse
+deb-src http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-updates main restricted universe multiverse
+deb-src http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-backports main restricted universe multiverse
+#測試版源
+deb-src http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-proposed main restricted universe multiverse
+```
+
+```shell
+sudo cp /etc/apt/sources.list /etc/apt/sources.list.bcakup # 备份
+sudo vim /etc/apt/sources.list
+# 放入上面的清华和阿里源，保存退出
+```
+
+不更新，不安装显卡驱动。
+
+
+```shell
+# 卸载冲突包
+for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; 
+do sudo apt-get remove $pkg; 
+done
+# 清除数据
+sudo apt-get purge docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker-ce-rootless-extras
+
+```
+
+
+
+参考[CSDN](https://blog.csdn.net/m0_49336687/article/details/123953726)、
+docker官网
