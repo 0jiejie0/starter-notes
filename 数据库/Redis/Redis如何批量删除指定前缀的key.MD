@@ -6,4 +6,4 @@
 
 ## 方法
 
-参考[博客园文章](https://www.cnblogs.com/lianshuiwuyi/p/17656763.html)，因他人中途接手，因为未做实际验证，待验证后再来摘录。
+参考[博客园文章](https://www.cnblogs.com/lianshuiwuyi/p/17656763.html)，因他人中途接手，因此未做实际验证，待验证后再来摘录。
