@@ -26,7 +26,7 @@
 
 ### UbuntuServer安装及初始化过程
 
-1. 在虚拟机内安装不用考虑分区问题，网络会自动检测DHCP，但是为了以后连接方便还是建议用固定IP，已经启用DHCP的，进行如下操作可设置固定IP：
+1. 在虚拟机内安装不用考虑分区问题，网络会自动检测DHCP，但是为了以后连接方便还是建议用固定IP，已经启用DHCP的，进行如下操作可设置固定IP（未配置成功）：
 
 ```shell
 $ ip addr # 找到网卡enp0s3（后缀会有变化，enp打头的就是），本机IP 10.0.2.15/24
@@ -57,17 +57,20 @@ network:
 # 可以看到，enp0s3的DHCP是开启状态，需要改成下面的内容：
 network:  
   ethernets:    
-    ens33:      
-      dhcp4: no      
-      addresses: [10.0.2.15/24]   #设置本机IP及掩码      
-      optional: true      
-      gateway4: 10.0.2.1   #设置网关（ipv4 dns服务器）      
+    ens33:                        # 网卡
+      dhcp4: false      
+      addresses: [10.0.2.15/24]   # 设置本机IP及掩码
+      routes:
+          - to: default
+            via: 10.0.2.1
       nameservers:        
         addresses: [114.114.114.114, 8.8.8.8]   #设置DNS  
   version: 2
+  renderer: networkd
 $ sudo netplan apply # 应用配置
 $ sudo systemctl restart systemd-networkd # 重启网络服务
 ```
+**注意！以上未配置成功**
 
 搜素：[ubuntu dhcp 固定IP](https://www.baidu.com/s?wd=ubuntu+dhcp+%E5%9B%BA%E5%AE%9AIP&ie=UTF-8&tn=62095104_26_oem_dg)，
 参考：[CSDN](https://blog.csdn.net/WwwALlll/article/details/133280034)、
