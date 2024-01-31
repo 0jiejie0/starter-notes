@@ -34,7 +34,7 @@ Caused by: java.lang.IllegalStateException: Unable to open nested entry 'BOOT-IN
 
 一看就是压缩软件导致的问题，本来以为就是不能改动这个jar包的，直到搜到[一篇博客](https://blog.csdn.net/weixin_50913916/article/details/120634229)。
 
-其实是这个压缩软件不行，放入jar文件的时候会对该文件进行二次解压，只要不让它解压就好了。
+其实是这个压缩软件不行，放入jar文件的时候会对该文件进行二次压缩，只要不让它压缩就好了。
 但是先前服务器用的好压软件设置以后还是不能正常使用，换用winrar就可以了。
 
 ## 解决方案
