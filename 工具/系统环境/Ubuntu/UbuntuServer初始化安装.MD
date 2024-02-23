@@ -26,9 +26,12 @@
 
 ### UbuntuServer安装及初始化过程
 
-1. 在虚拟机内安装不用考虑分区问题，网络会自动检测DHCP，但是为了以后连接方便还是建议用固定IP，已经启用DHCP的，进行如下操作可设置固定IP（未配置成功）：
+1. openssh服务安装上（我感觉应该安装）；
+2. 在虚拟机内安装不用考虑分区问题，网络会自动检测DHCP，但是为了以后连接方便还是建议用固定IP，已经启用DHCP的，进行如下操作可设置固定IP（未配置成功）：
 
 ```shell
+## 注意！本操作未成功配置
+
 $ ip addr # 找到网卡enp0s3（后缀会有变化，enp打头的就是），本机IP 10.0.2.15/24
 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
@@ -78,10 +81,26 @@ $ sudo systemctl restart systemd-networkd # 重启网络服务
 
 [//]: # (todo 暂时不知道上边这两条命令好不好使，也有只说明到倒二，没有最后这条命令的，都执行了，有问题再说)
 
-2. 安装程序最后有选择初始化安装程序的步骤，按空格选择需要用的程序（但是似乎不太好用，我勾选docker安装完以后，docker命令没有），其余一般用默认选项即可
-3. 启动系统输入密码发现系统时间不对
+3. 安装程序最后有选择初始化安装程序的步骤，按空格选择需要用的程序（但是似乎不太好用，我勾选docker安装完以后，docker命令没有，可以一个都不选），其余一般用默认选项即可
+4. 最后执行分区前记得断开网络连接，以免自动联网更新
+5. 启动系统输入密码发现系统时间不对
 
 用如下命令修改时区（参考链接：[ubuntu上修改时区的两种方法](https://blog.csdn.net/kaka_buka/article/details/131540461)）：
+
+6. 开启root远程登录权限，以便使用远程工具
+
+```Bash
+$ sudo passwd # 修改密码
+$ su # 切换到root用户（或者重新登录也可），无特殊说明，下文均使用root权限操作
+$ vim /etc/ssh/sshd_config
+# 输入 “:set nu ”打开行号显示
+# 光标定位到 34 #PermitRootLogin prohibit-password，输入 yy p 复制一行，按下i编辑，修改为：
+PermitRootLogin yes
+# :wq保存并退出
+$ systemctl restart sshd
+```
+[参考链接](https://blog.csdn.net/m0_55905467/article/details/133744201)
+
 
 ```Bash
 timedatectl  # 查看当前设置
