@@ -82,10 +82,34 @@ $ sudo systemctl restart systemd-networkd # 重启网络服务
 [//]: # (todo 暂时不知道上边这两条命令好不好使，也有只说明到倒二，没有最后这条命令的，都执行了，有问题再说)
 
 3. 安装程序最后有选择初始化安装程序的步骤，按空格选择需要用的程序（但是似乎不太好用，我勾选docker安装完以后，docker命令没有，可以一个都不选），其余一般用默认选项即可
-4. 最后执行分区前记得断开网络连接，以免自动联网更新
-5. 启动系统输入密码发现系统时间不对
+4. 安装源手动输入阿里云的源：http://mirrors.aliyun.com/ubuntu
+5. 最后执行分区前记得断开网络连接，以免自动联网更新
+6. 启动系统输入密码发现系统时间不对
 
-用如下命令修改时区（参考链接：[ubuntu上修改时区的两种方法](https://blog.csdn.net/kaka_buka/article/details/131540461)）：
+用如下命令修改时区
+
+```Bash
+$ timedatectl
+               Local time: Fri 2024-02-23 09:04:09 UTC
+           Universal time: Fri 2024-02-23 09:04:09 UTC
+                 RTC time: Fri 2024-02-23 09:04:06
+                Time zone: Etc/UTC (UTC, +0000)
+System clock synchronized: yes
+              NTP service: active
+          RTC in local TZ: no
+$ timedatectl set-timezone Asia/Shanghai
+$ timedatectl
+               Local time: Fri 2024-02-23 17:04:52 CST
+           Universal time: Fri 2024-02-23 09:04:52 UTC
+                 RTC time: Fri 2024-02-23 09:04:48
+                Time zone: Asia/Shanghai (CST, +0800)
+System clock synchronized: yes
+              NTP service: active
+          RTC in local TZ: no
+$ systemctl restart systemd-timesyncd # 这个命令好像没有十分必要，这步之前就已经改过来了
+```
+
+（参考链接：[ubuntu上修改时区的两种方法](https://blog.csdn.net/kaka_buka/article/details/131540461)）：
 
 6. 开启root远程登录权限，以便使用远程工具
 
