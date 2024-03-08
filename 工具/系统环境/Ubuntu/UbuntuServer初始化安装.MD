@@ -219,9 +219,31 @@ $ vim /etc/apt/sources.list
 $ for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; 
 do sudo apt-get remove $pkg; 
 done
-# 清除数据
+# 清除Docker Engine, CLI, containerd, and Docker Compose包
 $ apt-get purge docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker-ce-rootless-extras
+# 清除主机上的Images, containers, volumes, or custom configuration files
+$ rm -rf /var/lib/docker
+$ rm -rf /var/lib/containerd
 ```
 
 参考[CSDN](https://blog.csdn.net/m0_49336687/article/details/123953726)、
-docker官网
+[docker官网](https://docs.docker.com/engine/install/ubuntu/)
+
+#### 利用apt仓库安装
+
+##### 设置docker apt仓库
+```Bash
+# Add Docker's official GPG key:
+sudo apt-get update
+sudo apt-get install ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+# Add the repository to Apt sources:
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt-get update
+```
