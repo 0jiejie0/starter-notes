@@ -84,6 +84,34 @@ $ sudo systemctl restart systemd-networkd # 重启网络服务
 
 [//]: # (todo 暂时不知道上边这两条命令好不好使，也有只说明到倒二，没有最后这条命令的，都执行了，有问题再说)
 
+此处网络问题暂时使用vagrant+ubuntu2004镜像，可实现nat。
+首先virtual box要安装好并启动，修改其默认虚拟机目录。
+
+然后[下载](https://www.vagrantup.com/)安装vagrant后需要重启电脑，
+在系统环境变量中添加`VAGRANT_HOME`项，值为：`D:\simulation\vagrant\.vagrant.d`
+
+vagrant虚拟机安装方式有两种，其一是使用命令在线下载并安装
+
+```Bash
+# 在虚拟机目录下新建一个node01文件夹
+$ vagrant init generic/ubuntu2004 # 初始化配置
+$ vagrant up # 第一次使用镜像会自动启动下载，之后会系统启动，在virtual box窗口中可以看到
+```
+
+另一种是手动下载[一个镜像](https://app.vagrantup.com/generic/boxes/ubuntu2004)，然后本地安装。
+（个人推荐这种安装方法，因为1可以用工具加速下载，2下载以后可以永久使用，不再受网络及主机限制）
+
+```Bash
+# 下载的镜像应该是.box文件，如果不是把后缀名加上
+# 将镜像文件放到虚拟机目录
+$ vagrant box list # 查看是否存在
+# 加载镜像，指定的名称要尽量简短，同时要体现镜像信息
+$ vagrant box add ../vagrant-ubuntu2004-virtualbox-16cbdc9c-5d4a-4d68-bf17-f35bbc6946d2.box --name generic-ubuntu2004
+$ vagrant box list # 查看是否存在
+$ vagrant.exe init generic-ubuntu2004 # 初始化虚拟机配置（注意名称指定的是刚刚加载的镜像）
+$ vagrant.exe up # 自动配置，自动启动
+```
+
 3. 安装程序最后有选择初始化安装程序的步骤，按空格选择需要用的程序（但是似乎不太好用，我勾选docker安装完以后，docker命令没有，可以一个都不选），其余一般用默认选项即可
 4. 安装源手动输入阿里云的源：http://mirrors.aliyun.com/ubuntu
 5. 最后执行分区前记得断开网络连接，以免自动联网更新
