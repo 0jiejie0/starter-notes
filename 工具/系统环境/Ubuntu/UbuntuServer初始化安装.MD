@@ -26,8 +26,11 @@
 
 ### UbuntuServer安装及初始化过程
 
-1. openssh服务安装上（我感觉应该安装）；
-2. 在虚拟机内安装不用考虑分区问题，网络会自动检测DHCP，但是为了以后连接方便还是建议用固定IP，已经启用DHCP的，进行如下操作可设置固定IP（未配置成功）：
+#### 1. openssh服务安装上（我感觉应该安装）；
+
+#### 2. 设置固定IP（建议）或DHCP（默认）
+
+在虚拟机内安装不用考虑分区问题，网络会自动检测DHCP，但是为了以后连接方便还是建议用固定IP，已经启用DHCP的，进行如下操作可设置固定IP（未配置成功）：
 
         其实一般来讲，dhcp虚拟机结合vb的桥接模式，一般情况下IP是不会怎么变化的，我想用nat模式配合固定IP的主要原因就是在不变化IP的情况下，保证较高安全性（防止外部直接连接）
         但是，这并不是当下的主要矛盾，网络这一块能用就行，环境配好或者遇到问题以后再来研究也不算太迟
@@ -76,6 +79,7 @@ network:
 $ sudo netplan apply # 应用配置
 $ sudo systemctl restart systemd-networkd # 重启网络服务
 ```
+
 **注意！以上未配置成功**
 
 搜素：[ubuntu dhcp 固定IP](https://www.baidu.com/s?wd=ubuntu+dhcp+%E5%9B%BA%E5%AE%9AIP&ie=UTF-8&tn=62095104_26_oem_dg)，
@@ -84,10 +88,11 @@ $ sudo systemctl restart systemd-networkd # 重启网络服务
 
 [//]: # (todo 暂时不知道上边这两条命令好不好使，也有只说明到倒二，没有最后这条命令的，都执行了，有问题再说)
 
-此处网络问题暂时使用vagrant+ubuntu2004镜像，可实现nat。
+#### 此处网络问题暂时使用vagrant+ubuntu2004镜像，可实现nat。
+
 首先virtual box要安装好并启动，修改其默认虚拟机目录。
 
-然后[下载](https://www.vagrantup.com/)安装vagrant后需要重启电脑，
+然后[下载vagrant](https://www.vagrantup.com/)，安装后需要重启电脑，
 在系统环境变量中添加`VAGRANT_HOME`项，值为：`D:\simulation\vagrant\.vagrant.d`
 
 vagrant虚拟机安装方式有两种，其一是使用命令在线下载并安装
@@ -112,10 +117,15 @@ $ vagrant.exe init generic-ubuntu2004 # 初始化虚拟机配置（注意名称�
 $ vagrant.exe up # 自动配置，自动启动
 ```
 
-3. 安装程序最后有选择初始化安装程序的步骤，按空格选择需要用的程序（但是似乎不太好用，我勾选docker安装完以后，docker命令没有，可以一个都不选），其余一般用默认选项即可
-4. 安装源手动输入阿里云的源：http://mirrors.aliyun.com/ubuntu
-5. 最后执行分区前记得断开网络连接，以免自动联网更新
-6. 启动系统输入密码发现系统时间不对
+#### 3. 选择程序组件
+
+安装程序最后有选择初始化安装程序的步骤，按空格选择需要用的程序（但是似乎不太好用，我勾选docker安装完以后，docker命令没有，可以一个都不选），其余一般用默认选项即可
+
+#### 4. 安装源手动输入阿里云的源：http://mirrors.aliyun.com/ubuntu
+
+#### 5. 最后执行分区前记得断开网络连接，以免自动联网更新
+
+#### 6. 启动系统输入密码发现系统时间不对
 
 用如下命令修改时区
 
@@ -142,7 +152,7 @@ $ systemctl restart systemd-timesyncd # 这个命令好像没有十分必要，�
 
 （参考链接：[ubuntu上修改时区的两种方法](https://blog.csdn.net/kaka_buka/article/details/131540461)）：
 
-7. 开启root远程登录权限，以便使用远程工具
+#### 7. 开启root远程登录权限，以便使用远程工具
 
 ```Bash
 $ sudo passwd # 修改密码
@@ -154,14 +164,8 @@ PermitRootLogin yes
 # :wq保存并退出
 $ systemctl restart sshd
 ```
+
 [参考链接](https://blog.csdn.net/m0_55905467/article/details/133744201)
-
-
-```Bash
-timedatectl  # 查看当前设置
-sudo timedatectl set-timezone Asia/Shanghai
-timedatectl  # 查看设置结果
-```
 
 ### docker 安装
 
@@ -175,51 +179,49 @@ deb http://mirrors.aliyun.com/ubuntu/ bionic main restricted universe multiverse
 deb http://mirrors.aliyun.com/ubuntu/ bionic-security main restricted universe multiverse
 deb http://mirrors.aliyun.com/ubuntu/ bionic-updates main restricted universe multiverse
 deb http://mirrors.aliyun.com/ubuntu/ bionic-backports main restricted universe multiverse
-#測試版源
+#测试版源
 deb http://mirrors.aliyun.com/ubuntu/ bionic-proposed main restricted universe multiverse
-#源碼
+#源码
 deb-src http://mirrors.aliyun.com/ubuntu/ bionic main restricted universe multiverse
 deb-src http://mirrors.aliyun.com/ubuntu/ bionic-security main restricted universe multiverse
 deb-src http://mirrors.aliyun.com/ubuntu/ bionic-updates main restricted universe multiverse
 deb-src http://mirrors.aliyun.com/ubuntu/ bionic-backports main restricted universe multiverse
-#測試版源
+#测试版源
 deb-src http://mirrors.aliyun.com/ubuntu/ bionic-proposed main restricted universe multiverse
 #清华大学源
 deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic main restricted universe multiverse
 deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-security main restricted universe multiverse
 deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-updates main restricted universe multiverse
 deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-backports main restricted universe multiverse
-#測試版源
+#测试版源
 deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-proposed main restricted universe multiverse
-#源碼
+#源码
 deb-src http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic main restricted universe multiverse
 deb-src http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-security main restricted universe multiverse
 deb-src http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-updates main restricted universe multiverse
 deb-src http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-backports main restricted universe multiverse
-#測試版源
+#测试版源
 deb-src http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-proposed main restricted universe multiverse
 ```
 
 ```shell
-sudo cp /etc/apt/sources.list /etc/apt/sources.list.bcakup # 备份
-sudo vim /etc/apt/sources.list
+$ cp /etc/apt/sources.list /etc/apt/sources.list.bcakup # 备份
+$ vim /etc/apt/sources.list
 # 放入上面的清华和阿里源，保存退出
 ```
 
-不更新，不安装显卡驱动。
+#### 不更新，不安装显卡驱动。
 
+#### 卸载冲突包
 
 ```shell
 # 卸载冲突包
-for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; 
+$ for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; 
 do sudo apt-get remove $pkg; 
 done
 # 清除数据
-sudo apt-get purge docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker-ce-rootless-extras
-
+$ apt-get purge docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker-ce-rootless-extras
 ```
-
-
 
 参考[CSDN](https://blog.csdn.net/m0_49336687/article/details/123953726)、
 docker官网
