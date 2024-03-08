@@ -156,7 +156,7 @@ $ systemctl restart systemd-timesyncd # 这个命令好像没有十分必要，�
 
 ```Bash
 $ sudo passwd # 修改密码
-$ su # 切换到root用户（或者重新登录也可），无特殊说明，下文均使用root权限操作
+$ su # 切换到root用户（或者重新登录也可），无特殊说明，下文均使用root权限操作，也可以使用`sudo -i`命令切换到root用户，使用当前用户密码
 $ vim /etc/ssh/sshd_config
 # 输入 “:set nu ”打开行号显示
 # 光标定位到 34 #PermitRootLogin prohibit-password，输入 yy p 复制一行，按下i编辑，修改为：
