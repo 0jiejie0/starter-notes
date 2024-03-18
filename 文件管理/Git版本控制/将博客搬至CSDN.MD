@@ -12,7 +12,7 @@
 
 1. 添加微信**好友**：zero77ohyeah
 2. 点击[页面内链接](https://t.csdnimg.cn/EHP7)，发现内容是空白的，刷新几次没有效果
-3. 在CSDN创作中心刷新，菜单栏下滑，发现“工具”分类下有个“搬家”菜单，点击进入
+3. 在CSDN创作中心刷新，菜单栏下滑，发现“工具”分类下有个“搬家”菜单，[点击进入](https://mp.csdn.net/mp_blog/tools/move)
 4. 点击github选项（github已从gitee自动同步，详见[配置github、gitee双向同步](./gitee和github在线远程库双备，双向同步，镜像备份.MD)）
 5. 由于我的CSDN已经绑定github账号，所以此处直接输入我的笔记仓库名称[starter-notes](../../README.md#markdown多备笔记)
 6. 点击申请搬家按钮
