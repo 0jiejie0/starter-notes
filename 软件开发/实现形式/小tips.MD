@@ -6,7 +6,7 @@
 
 ### Java
 
-#### String对象的substring方法不能改变源数据，要另外赋值
+#### String对象的substring方法不能改变源数据，要另外赋值接收
 
 #### LinkedList对象可用作栈或队列，其pop方法弹出的是0号元素
 
