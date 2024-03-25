@@ -232,25 +232,27 @@ $ rm -rf /var/lib/containerd
 #### 利用apt仓库安装
 
 ##### 1. 设置docker apt仓库
+
 ```Bash
 # Add Docker's official GPG key:
-sudo apt-get update
-sudo apt-get install ca-certificates curl
-sudo install -m 0755 -d /etc/apt/keyrings
-sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-sudo chmod a+r /etc/apt/keyrings/docker.asc
+$ sudo apt-get update
+$ sudo apt-get install ca-certificates curl
+$ sudo install -m 0755 -d /etc/apt/keyrings
+$ sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+$ sudo chmod a+r /etc/apt/keyrings/docker.asc
 
 # Add the repository to Apt sources:
-echo \
+$ echo \
   "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
   $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
   sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-sudo apt-get update
+$ sudo apt-get update
 ```
 
-#### 2. 安装 docker 包
+##### 2. 安装 docker 包
 
 安装最新ce版
+
 ```Bash
 $ sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 $ docker version # 看一下版本
@@ -308,7 +310,24 @@ Share images, automate workflows, and more with a free Docker ID:
 
 For more examples and ideas, visit:
  https://docs.docker.com/get-started/
-$ docker images # 刚刚下载的镜像
+$ docker images # 刚刚下载的hello-world镜像
 REPOSITORY    TAG       IMAGE ID       CREATED         SIZE
 hello-world   latest    d2c94e258dcb   10 months ago   13.3kB
+```
+
+#### 配置阿里云镜像加速服务
+
+1. 打开阿里云官网的控制台》左上角菜单》产品与服务》容器服务》容器镜像服务，找到[镜像加速器](https://cr.console.aliyun.com/cn-hangzhou/instances/mirrors)
+2. 操作文档》Ubuntu
+3. 执行如下命令：
+
+```Bash
+sudo mkdir -p /etc/docker
+sudo tee /etc/docker/daemon.json <<-'EOF'
+{
+  "registry-mirrors": ["https://nb779h8d.mirror.aliyuncs.com"]
+}
+EOF
+sudo systemctl daemon-reload
+sudo systemctl restart docker
 ```
