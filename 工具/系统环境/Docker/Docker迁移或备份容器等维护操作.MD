@@ -80,7 +80,7 @@ $ docker cp 50a:/root/hello.txt /root/ # 容器 》 docker所在的主机位置�
 **慎用`-f`强制删除参数！** 正在运行中的容器默认不能删除容器，镜像之上有容器默认不能删除镜像。
 可以加`-f`强制删除，但有不可恢复的风险。
 
-删除及批量删除容器：
+##### 删除及批量删除容器：
 
 ```Bash
 $ docker rm 87
@@ -88,7 +88,7 @@ $ docker rm -f $(docker ps -aq)
 $ docker ps -aq | xargs docker rm
 ```
 
-删除镜像：
+##### 删除镜像：
 
 ```Bash
 $ docker rmi 76
