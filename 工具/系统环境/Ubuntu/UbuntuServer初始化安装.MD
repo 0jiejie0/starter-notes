@@ -90,20 +90,32 @@ $ sudo systemctl restart systemd-networkd # 重启网络服务
 
 #### 此处网络问题暂时使用vagrant+ubuntu2004镜像，可实现nat。
 
-首先virtual box要安装好并启动，修改其默认虚拟机目录。
+**若使用本法，ubuntu虚拟机其余安装步骤可略过。**
 
-然后[下载vagrant](https://www.vagrantup.com/)，安装后需要重启电脑，
+##### 首先virtual box要安装好并启动，修改其默认虚拟机目录为`D:\simulation`。
+
+##### 然后[下载vagrant](https://www.vagrantup.com/)，安装后需要重启电脑，
+
 在系统环境变量中添加`VAGRANT_HOME`项，值为：`D:\simulation\vagrant\.vagrant.d`
+（虚拟机路径+vagrant镜像路径，如果这里不设置会默认放到c盘用户目录下）
 
-vagrant虚拟机安装方式有两种，其一是使用命令在线下载并安装
+**注意注意！任何路径中都不能出现中文，否则后续过程会报错**
+
+##### 在虚拟机目录`D:\simulation\vagrant`下新建一个node01（虚拟机的名称可以写别的）文件夹，
+
+然后命令行进入该目录`D:\simulation\vagrant\node01`，执行下文中的命令；
+
+安装vagrant虚拟机，安装方式有两种：
+
+###### 其一是使用命令在线下载并安装
 
 ```Bash
-# 在虚拟机目录下新建一个node01文件夹
 $ vagrant init generic/ubuntu2004 # 初始化配置
 $ vagrant up # 第一次使用镜像会自动启动下载，之后会系统启动，在virtual box窗口中可以看到
 ```
 
-另一种是手动下载[一个镜像](https://app.vagrantup.com/generic/boxes/ubuntu2004)，然后本地安装。
+###### 其二是手动下载[一个镜像](https://app.vagrantup.com/generic/boxes/ubuntu2004)，然后本地安装。
+
 （个人推荐这种安装方法，因为1可以用工具加速下载，2下载以后可以永久使用，不再受网络及主机限制）
 
 ```Bash
@@ -116,6 +128,33 @@ $ vagrant box list # 查看是否存在
 $ vagrant.exe init generic-ubuntu2004 # 初始化虚拟机配置（注意名称指定的是刚刚加载的镜像）
 $ vagrant.exe up # 自动配置，自动启动
 ```
+
+注意，这里init命令执行后会生成Vagrantfile文件，后续会用到。
+
+##### 配置虚拟机网络并连接
+
+上一步启动后，可以直接在虚拟机目录使用`vagrant ssh`命令连接；
+从启动窗口可以看到，其默认会将虚拟机22端口映射到主机的2222端口，所以使用`ssh vagrant@127.0.0.1 -p 2222`也能连接，密码默认为vagrant；
+多一层映射总是不太方便，所以这里配置一下固定IP。
+
+修改node01目录下的配置文件 Vagrantfile：
+
+```Bash
+# 下面这个vim是我用git bash打开用的命令，可以用记事本直接打开 Vagrantfile，修改对应行即可
+$ vim Vagrantfile
+# 输入 :set nu 回车
+# 光标定位到35行  # config.vm.network "private_network", ip: "192.168.33.10"
+# 按下yy p复制一下，按下i编辑其中一行，去掉注释，改为：
+config.vm.network "private_network", ip: "192.168.56.10"
+```
+
+打开virtual box，关闭node01...虚拟机，打开刚刚的cmd窗口，再次执行`vagrant.exe up`命令；
+
+使用`ssh vagrant@192.168.56.10`连接，密码为vagrant。
+
+自此，可以使用ssh工具记住密码连接了。
+
+[//]: # (todo 或者也可以配置免密登录，挖个坑。)
 
 #### 3. 选择程序组件
 
@@ -317,7 +356,8 @@ hello-world   latest    d2c94e258dcb   10 months ago   13.3kB
 
 #### 配置阿里云镜像加速服务
 
-1. 打开阿里云官网的控制台》左上角菜单》产品与服务》容器服务》容器镜像服务，找到[镜像加速器](https://cr.console.aliyun.com/cn-hangzhou/instances/mirrors)
+1.
+打开阿里云官网的控制台》左上角菜单》产品与服务》容器服务》容器镜像服务，找到[镜像加速器](https://cr.console.aliyun.com/cn-hangzhou/instances/mirrors)
 2. 操作文档》Ubuntu
 3. 执行如下命令：
 
