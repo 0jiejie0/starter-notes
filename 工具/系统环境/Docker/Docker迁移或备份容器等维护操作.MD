@@ -22,7 +22,7 @@ $ docker inspect 8c # 查看容器或镜像的json格式元数据
 ```Bash
 $ docker pull tomcat # 最新版
 $ docker pull centos:centos7 # 指定版本
-$ docker run -it -p 8888:8080 tomcat # 创建容器并指定映射端口 主机端口：容器端口
+$ docker run -it -p 8888:8080 tomcat /bin/bash # 创建容器并指定映射端口 主机端口：容器端口，-it /bin/bash 开启一个终端
 $ docker run -it centos:centos7 /bin/bash # 创建容器并启动一个终端，容器内必须有进程运行，否则会立即停止容器
 $ docker run -d centos:centos7 /bin/bash -c 'while true; do echo hello;sleep 2;done' # 创建容器并执行命令，两秒输出一个条hello
 ```
@@ -65,11 +65,40 @@ $ docker kill 6
 #### 将某容器保存为镜像
 
 ```Bash
-# docker commit -a='用户名uname' -m='描述信息描述信息描述信息描述' 镜像id  项目名项目名:版本号
+# docker commit -a='用户名unam' -m='描述信息描述信息描述信息' 容器id  镜像名:版本号
 $ docker commit -a='xkm-tomcat' -m='add index.html > hello'  cfc   xkm/tomcat:1.1
 ```
 
-#### 文件转移
+#### 将某镜像导出
+
+```Bash
+# 这里最后的参数用镜像id，网上说的镜像名用不了，没深究啥原因
+$ docker save -o mysql5.6.51.202404.tar ffa # win 平台测试可用
+```
+
+#### 将某镜像导入
+
+```Bash
+$ docker images # 查看已有镜像
+# 转移到新机器上，容器名称和版本号没跟着过来，还是空的
+$ docker load -i mysql5.6.51.202404.tar
+$ docker images # 发现新添加的镜像没有标签，使用下面的命令
+REPOSITORY    TAG             IMAGE ID
+<none>        <none>          ffa919df7b67 ...
+$ docker tag ff xkm/mysql:5.6.51.202424 # 添加一下标签，避免后期遗忘搞混
+$ docker images
+REPOSITORY    TAG             IMAGE ID       CREATED         SIZE
+xkm/mysql     5.6.51.202424   ffa919df7b67   ...
+$ docker ps -a
+# 运行刚刚的命令，记得开启端口映射
+$ docker run -it -p 3306:3306 aaff /bin/bash # -it /bin/bash 开启一个终端
+$ docker run -p 3306:3306 --name mysql5.6.51 -e MYSQL_ROOT_PASSWORD=root -d xkm/mysql:5.6.51 # MySQL启动方法
+```
+
+使用连接工具连接该MySQL容器，发现数据库空空如也，这是因为[commit镜像没有数据](./docker%20commit%20后的镜像没有数据.MD),
+修改文件后重新执行commit save load run操作，
+
+#### 容器和主机间文件转移
 
 ```Bash
 $ docker cp 50a:/root/hello.txt /root/ # 容器 》 docker所在的主机位置（虚拟机）
