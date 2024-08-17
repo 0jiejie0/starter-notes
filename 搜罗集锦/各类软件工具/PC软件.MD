@@ -61,3 +61,11 @@ Android studio
 spss
 cajview
 ```
+
+软件开发基础环境配置说明
+
+```
+jdk8 未在系统中配置path, 有从win虚拟机复制下来的jdk8，仅从idea项目中引用，jdk安装包无法安装，原因未知，可能是注册表有问题
+idea 和 git 软件已安装
+mysql、运行jdk、redis现在运行在win虚拟机内，通过nat转发访问
+```
