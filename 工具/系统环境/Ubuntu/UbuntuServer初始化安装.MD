@@ -206,6 +206,11 @@ $ systemctl restart sshd
 
 [参考链接](https://blog.csdn.net/m0_55905467/article/details/133744201)
 
+> 上文中没有提到，但是偶然从先前笔记中记录的内容（可能有用）：
+> 
+> 配置文件打开 PasswordAuthentication yes：启用密码身份验证。
+> 保存配置后，重新加载配置文件：sudo service ssh reload
+
 ### docker 安装
 
 #### 更新源
