@@ -11,6 +11,8 @@
 大致分为两篇，上篇介绍 [类文件的扫描和反射](./java扫描指定包下所有类.MD)
 ，本篇介绍 [按照注解执行类中的方法](./java实例化class对象，利用注解入参并执行其方法.MD)
 
+这东西不多熟悉还真是不行，有两三天不动反射和类型处理相关代码，就有些生分，不知其所以然了，刚处理完遇到的问题，抓紧时间再来更新一下，省得忘了。2024-9-11
+
 ## 解决方案
 
 1. 获取各Class（是Class对象，代表各‘类’，不是各具体对象）的各方法对象：`aClass.getDeclaredMethods()`
@@ -22,7 +24,10 @@
 7. 获取各方法上的参数类型列表和返回值类型：`method.getParameterTypes()`、`method.getReturnType()`
 8. [根据方法各参数类型，将注解数据转换成相应对象](./数据类型自动转换的解决方案.MD)
 9. 各方法对象执行调用方法（invoke）：`method.invoke(object, paramObjectList)`，
-   其中第一个参数需要其类的实例化对象：`method.getDeclaringClass().getDeclaredConstructor().newInstance()`
+   其中第一个参数需要其类的实例化对象：`method.getDeclaringClass().getDeclaredConstructor().newInstance()`；
+   然而，如果`"".equals(Modifier.toString(method.getDeclaringClass().getModifiers()))`表名这个方法所在类是和文件不同名的（无public修饰符），
+   那就需要在这个类所在包安插一个哨兵`Sentry`类，通过访问哨兵（反射获取所在包内的哨兵类并执行其方法），由哨兵执行上面的newInstance方法，返回其类的实例化对象，
+   同时再设置一下这个方法的可见性，即可使用invoke执行；
 10. 执行前后记录时间戳：`System.currentTimeMillis()`或`System.nanoTime()`
 
 代码示例：
@@ -104,7 +109,7 @@ public class Task {
      */
     public void runMethod(Method method, Object[] paramObjects, Object expectResultObject) throws Exception {
         System.out.print("\t测试样例 : \t");
-        System.out.println(Convert.toString(paramObjects) + " => " + Convert.toString(expectResultObject));
+        System.out.println(Convert.toString(paramObjects, new String[]{"", ""}) + " => " + Convert.toString(expectResultObject));
         System.out.print("\t样例用时(ms)：");
         System.out.println(invoke(method, paramObjects, expectResultObject));
     }
@@ -119,7 +124,17 @@ public class Task {
      * @throws Exception 方法对应类 实例化产生的异常
      */
     public long invoke(Method method, Object[] paramObjects, Object expectResultObject) throws Exception {
-        Object instance = method.getDeclaringClass().getDeclaredConstructor().newInstance();
+        Object instance;
+        if ("".equals(Modifier.toString(method.getDeclaringClass().getModifiers()))) {
+            // 默认控制修饰符表明，这个类的类名和文件名不一致（leetcode插件自动加载的文件，否则应该是public）
+            Class<?> transCls = Class.forName(method.getDeclaringClass().getPackage().getName() + ".Sentry");
+            Object ti = transCls.getDeclaredConstructor().newInstance();
+            instance = transCls.getDeclaredMethods()[0].invoke(ti, method);  // 借助同包的哨兵，获取其类实例
+        } else {
+            // 普通的public类
+            instance = method.getDeclaringClass().getDeclaredConstructor().newInstance();
+        }
+        method.setAccessible(true);
         long start = getTimeStamp();
         Object executeResult = method.invoke(instance, paramObjects);  // 为更准确反映真实运行时间，紧邻执行动作前后记录时间戳，不穿插其他动作
         long end = getTimeStamp();
@@ -127,6 +142,15 @@ public class Task {
                 "期望值：\t" + Convert.toString(expectResultObject) + "\n" +
                 "实际值：\t" + Convert.toString(executeResult);
         return end - start;
+    }
+}
+```
+
+和文件不同名的类所在包处的哨兵类代码样例：
+```Java
+public class Sentry {
+    public Object seek(Method method) throws Exception {
+        return method.getDeclaringClass().getDeclaredConstructor().newInstance();
     }
 }
 ```
