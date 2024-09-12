@@ -140,7 +140,9 @@ public class Task {
         long end = getTimeStamp();
         assert executeResult.equals(expectResultObject) : "\n" +
                 "期望值：\t" + Convert.toString(expectResultObject) + "\n" +
-                "实际值：\t" + Convert.toString(executeResult);
+                "实际值：\t" + Convert.toString(executeResult) + "\n" +
+                method.getDeclaringClass().getName() + "." + method.getName() + "(" + method.getDeclaringClass().getSimpleName() + ".java:100)";
+       // 最后这个是在日志中定位到错误文件位置，超过100行的定位到100行，没有的定位到文件开头
         return end - start;
     }
 }
