@@ -105,6 +105,21 @@ main.leetcode.editor.cn.Solution.singleNumber(Solution.java:100)
 4. [扫描注解入参并执行其方法，类和文件不同名的需要在包内安插一个 Sentry 类辅助实例化](../实现形式/java实例化class对象，利用注解入参并执行其方法.MD#解决方案)，
    其中断言定位错误代码的行数并不准确，因为反射方法已经执行完毕，无法取得其线程栈信息，也无法通过返回值返回行数（原本方法就有返回值，而且那样会破坏了原方法）
 5. [添加IDE的Java虚拟机启动参数，开启断言](../../工具/调测部署/IDEA2023.1添加java虚拟机启动参数，打开断言.MD#解决方案)
+6. 最后把启动类写上：
+
+```Java
+public class Main {
+    public static void main(String[] args) throws Exception {
+        long start = Task.getTimeStamp();
+        System.out.println("测试程序已启动，时间戳：" + start);
+        loadClassFiles();  // 加载类文件，内部文件列表为全局变量，若多次加载文件，需要重新调整其内部结构
+        List<Class<?>> classList = getClasses(new Class[]{AssertExample.class, AssertExamples.class});  // 文件转化为class对象，筛选可运行类
+        new Task(classList).testClasses();
+        long end = Task.getTimeStamp();
+        System.out.println("测试程序已启动，时间戳：" + end + "，总计用时（ms）：" + (end - start));
+    }
+}
+```
 
 主要重点在class扫描和方法的入参和执行上，此二者逻辑链较长，其他问题相较起来就简单零碎些，好处理。
 
