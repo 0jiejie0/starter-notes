@@ -1,4 +1,4 @@
-# docker部署emqx服务容器，启动成功几分钟后，报错：OS monotonic time stepped backwards! Maybe add '+c false' in vm.args
+# docker部署emqx服务容器，启动成功几分钟后，报错：OS monotonic time stepped backwards
 
     virtual box7.0、utuntu 20.04、docker、emqx 5.8.0
 
