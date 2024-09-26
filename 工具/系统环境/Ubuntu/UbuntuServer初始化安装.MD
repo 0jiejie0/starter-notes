@@ -26,9 +26,15 @@
 
 ### UbuntuServer安装及初始化过程
 
-#### 1. openssh服务安装上（我感觉应该安装）；
+#### 用vbox从镜像手动创建虚拟机
 
-#### 2. 设置固定IP（建议）或DHCP（默认）
+本节与[下一节](#利用vagrant创建虚拟机)二选一
+
+##### 1. openssh服务安装上（我感觉应该安装）；
+
+##### 2. 设置固定IP（建议）或DHCP（默认）
+
+**！这里没有成功设置固定IP！！** 开发环境需要固定IP的，移步[下一节利用vagrant安装](#利用vagrant创建虚拟机)
 
 在虚拟机内安装不用考虑分区问题，网络会自动检测DHCP，但是为了以后连接方便还是建议用固定IP，已经启用DHCP的，进行如下操作可设置固定IP（未配置成功）：
 
@@ -88,20 +94,28 @@ $ sudo systemctl restart systemd-networkd # 重启网络服务
 
 [//]: # (todo 暂时不知道上边这两条命令好不好使，也有只说明到倒二，没有最后这条命令的，都执行了，有问题再说)
 
-#### 此处网络问题暂时使用vagrant+ubuntu2004镜像，可实现nat。
+##### 3. 选择程序组件
 
-**若使用本法，ubuntu虚拟机其余安装步骤可略过。**
+安装程序最后有选择初始化安装程序的步骤，按空格选择需要用的程序（但是似乎不太好用，我勾选docker安装完以后，docker命令没有，可以一个都不选），其余一般用默认选项即可
 
-##### 首先virtual box要安装好并启动，修改其默认虚拟机目录为`D:\simulation`。
+##### 4. 安装源手动输入阿里云的源：http://mirrors.aliyun.com/ubuntu
 
-##### 然后[下载vagrant](https://www.vagrantup.com/)，安装后需要重启电脑，
+##### 5. 最后执行分区前记得断开网络连接，以免自动联网更新
+
+#### 利用vagrant创建虚拟机
+
+使用vagrant+ubuntu2004镜像，可实现nat，避免网络问题。
+
+##### 1. virtual box安装好并启动，修改其默认虚拟机目录为`D:\simulation`。
+
+##### 2. [下载vagrant](https://www.vagrantup.com/)，安装后需要重启电脑，
 
 在系统环境变量中添加`VAGRANT_HOME`项，值为：`D:\simulation\vagrant\.vagrant.d`
 （虚拟机路径+vagrant镜像路径，如果这里不设置会默认放到c盘用户目录下）
 
 **注意注意！任何路径中都不能出现中文，否则后续过程会报错**
 
-##### 在虚拟机目录`D:\simulation\vagrant`下新建一个node01（虚拟机的名称可以写别的）文件夹，
+##### 3. 在虚拟机目录`D:\simulation\vagrant`下新建一个node01（虚拟机的名称可以写别的）文件夹，
 
 然后命令行进入该目录`D:\simulation\vagrant\node01`，执行下文中的命令；
 
@@ -131,7 +145,7 @@ $ vagrant.exe up # 自动配置，自动启动
 
 注意，这里init命令执行后会生成Vagrantfile文件，后续会用到。
 
-##### 配置虚拟机网络并连接
+##### 4. 配置虚拟机网络并连接
 
 上一步启动后，可以直接在虚拟机目录使用`vagrant ssh`命令连接；
 从启动窗口可以看到，其默认会将虚拟机22端口映射到主机的2222端口，所以使用`ssh vagrant@127.0.0.1 -p 2222`也能连接，密码默认为vagrant；
@@ -152,19 +166,58 @@ config.vm.network "private_network", ip: "192.168.56.10"
 
 使用`ssh vagrant@192.168.56.10`连接，密码为vagrant。
 
-自此，可以使用ssh工具记住密码连接了。
+#### 开启远程登录权限，以便使用远程工具
+
+这里用ssh有可能会遇到如下错误，解决方案同附：
+
+```bash
+#在物理机尝试连接虚拟机
+> ssh vagrant@192.168.56.70  # 出错
+The authenticity of host '192.168.56.70 (192.168.56.70)' can't be established.
+RSA key fingerprint is SHA256:Gk8aZS5IboYykGJkfOZnSXj4w+TgOq/6UOknVp7Xp4w.
+RSA key fingerprint is MD5:83:dc:b3:1e:86:ac:09:a9:c5:a3:6f:82:fb:80:de:59.
+Are you sure you want to continue connecting (yes/no)? yes
+Warning: Permanently added '192.168.56.70' (RSA) to the list of known hosts.
+Permission denied (publickey,gssapi-keyex,gssapi-with-mic).
+
+# 使用vagrant进入虚拟机，修改配置
+> vagrant.exe ssh
+> sudo -i
+> vim ~/.ssh/config
+UserKnownHostsFile ~/.ssh/known_hosts
+
+> ssh vagrant@192.168.56.70  # 再次出错
+Permission denied (publickey,gssapi-keyex,gssapi-with-mic).
+> vim /etc/ssh/sshd_config
+ 62 # To disable tunneled clear text passwords, change to no here!
+ 63 PasswordAuthentication yes  ### 打开这行的注释,启用密码身份验证
+ 64 #PermitEmptyPasswords no
+ 65 #PasswordAuthentication no
+> systemctl restart sshd.service  # 重启sshd服务，否则不生效，使用 service ssh reload 也可
+> ssh vagrant@192.168.56.70
+# 登录成功
+```
+
+超级管理员root使用密码连接：
+
+```Bash
+> sudo passwd # 修改密码
+> su # 切换到root用户（或者重新登录也可），无特殊说明，下文均使用root权限操作，也可以使用`sudo -i`命令切换到root用户，使用当前用户密码
+> vim /etc/ssh/sshd_config
+# 输入 “:set nu ”打开行号显示
+# 光标定位到 34 #PermitRootLogin prohibit-password，输入 yy p 复制一行，按下i编辑，修改为：
+PermitRootLogin yes
+# :wq保存并退出
+> systemctl restart sshd
+```
+
+[参考链接](https://blog.csdn.net/m0_55905467/article/details/133744201)
+
+自此，可以使用ssh工具记住密码连接了。推荐`mobaXterm`，不要用`Xshell`、`FinalShell`或者`git Bash`、`powershell`等，难用或有乱码。
 
 [//]: # (todo 或者也可以配置免密登录，挖个坑。)
 
-#### 3. 选择程序组件
-
-安装程序最后有选择初始化安装程序的步骤，按空格选择需要用的程序（但是似乎不太好用，我勾选docker安装完以后，docker命令没有，可以一个都不选），其余一般用默认选项即可
-
-#### 4. 安装源手动输入阿里云的源：http://mirrors.aliyun.com/ubuntu
-
-#### 5. 最后执行分区前记得断开网络连接，以免自动联网更新
-
-#### 6. 启动系统输入密码发现系统时间不对
+#### 启动系统输入密码（如果）发现系统时间不对
 
 用如下命令修改时区
 
@@ -191,31 +244,11 @@ $ systemctl restart systemd-timesyncd # 这个命令好像没有十分必要，�
 
 （参考链接：[ubuntu上修改时区的两种方法](https://blog.csdn.net/kaka_buka/article/details/131540461)）：
 
-#### 7. 开启root远程登录权限，以便使用远程工具
-
-```Bash
-$ sudo passwd # 修改密码
-$ su # 切换到root用户（或者重新登录也可），无特殊说明，下文均使用root权限操作，也可以使用`sudo -i`命令切换到root用户，使用当前用户密码
-$ vim /etc/ssh/sshd_config
-# 输入 “:set nu ”打开行号显示
-# 光标定位到 34 #PermitRootLogin prohibit-password，输入 yy p 复制一行，按下i编辑，修改为：
-PermitRootLogin yes
-# :wq保存并退出
-$ systemctl restart sshd
-```
-
-[参考链接](https://blog.csdn.net/m0_55905467/article/details/133744201)
-
-> 上文中没有提到，但是偶然从先前笔记中记录的内容（可能有用）：
-> 
-> 配置文件打开 PasswordAuthentication yes：启用密码身份验证。
-> 保存配置后，重新加载配置文件：sudo service ssh reload
-
 ### docker 安装
 
-#### 更新源
+#### 更新源（目前国内docker已无法下载镜像）
 
-各种源；
+各种源(可以不换，docker用不到这个，各站点已关闭，完全不需要)；
 
 ```shell
 #阿里云源
@@ -254,9 +287,9 @@ $ vim /etc/apt/sources.list
 # 放入上面的清华和阿里源，保存退出
 ```
 
-#### 不更新，不安装显卡驱动。
+#### 不要更新，不要安装显卡驱动。
 
-#### 卸载冲突包
+#### 卸载冲突包（卸载曾安装的文件）
 
 ```shell
 # 卸载冲突包
@@ -359,10 +392,12 @@ REPOSITORY    TAG       IMAGE ID       CREATED         SIZE
 hello-world   latest    d2c94e258dcb   10 months ago   13.3kB
 ```
 
-#### 配置阿里云镜像加速服务
+#### 配置阿里云镜像加速服务（目前国内docker已无法下载镜像）
 
 1.
+
 打开阿里云官网的控制台》左上角菜单》产品与服务》容器服务》容器镜像服务，找到[镜像加速器](https://cr.console.aliyun.com/cn-hangzhou/instances/mirrors)
+
 2. 操作文档》Ubuntu
 3. 执行如下命令：
 
