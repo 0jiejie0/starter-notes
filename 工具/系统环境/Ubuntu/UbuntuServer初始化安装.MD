@@ -162,9 +162,18 @@ $ vim Vagrantfile
 config.vm.network "private_network", ip: "192.168.56.10"
 ```
 
+如果需要nat的同时还需要桥接，则可参照[这篇文章](https://blog.csdn.net/u013915286/article/details/117999505)，附加如下配置：
+
+```bash
+  config.vm.network "public_network", bridge: "Realtek USB GbE Family Controller", ip: "192.168.10.16"
+```
+
+其中，bridge和IP可省去，启动时根据提示选择要桥接的网卡，选择时记住网卡名称，启动后使用`ip addr`查看虚拟机分配到的IP,将网卡名称和ip在此处重新配置即可。
+
 打开virtual box，关闭node01...虚拟机，打开刚刚的cmd窗口，再次执行`vagrant.exe up`命令；
 
 使用`ssh vagrant@192.168.56.10`连接，密码为vagrant。
+ps: 如果使用ssh连接没有反应，这可能是virtualbox的bug，重新打开一下vbox的管理页面就好了
 
 #### 开启远程登录权限，以便使用远程工具
 
