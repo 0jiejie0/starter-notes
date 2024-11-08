@@ -55,6 +55,7 @@ public class T一道题目Solution {
 要重复使用的注解定义：
 
 ```Java
+package main.customUtil;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)  // 注解保留到运行时
@@ -70,6 +71,7 @@ public @interface AssertExample {
 其注解容器定义：
 
 ```Java
+package main.customUtil;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)

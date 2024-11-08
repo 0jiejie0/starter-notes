@@ -108,6 +108,7 @@ main.leetcode.editor.cn.Solution.singleNumber(Solution.java:100)
 6. 最后把启动类写上：
 
 ```Java
+package main;
 public class Main {
     public static void main(String[] args) throws Exception {
         long start = Task.getTimeStamp();
