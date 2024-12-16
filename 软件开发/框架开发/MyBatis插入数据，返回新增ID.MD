@@ -1,6 +1,6 @@
 # MyBatis插入数据，返回新增数据的ID
 
-    mybatis、springboot2、MySQL、xml
+    mybatis、springboot2、MySQL、xml、返回主键、返回id
 
 其实有一些低代码平台生成的代码里本身就有这部分内容，不过不一定实时都能有好用的工具可以用，这是先前的一个疑问点，特此记录以备它用。
 
