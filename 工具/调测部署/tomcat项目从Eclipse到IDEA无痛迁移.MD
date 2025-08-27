@@ -2,6 +2,11 @@
 
 ## 背景
 
+IDEA 2020.1 Build #IU-201.6668.121,built on April 8,2020
+tomcat 8.0.36
+jdk 1.8.0_162
+eclipse 2023
+
 ## 解决方案
 
 * 导入项目
