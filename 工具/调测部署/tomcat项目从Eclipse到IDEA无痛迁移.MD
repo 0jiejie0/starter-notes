@@ -1,11 +1,16 @@
 # tomcat项目从Eclipse到IDEA无痛迁移
 
+    tomcat、eclipse、IDEA、迁移
+
 ## 背景
 
-IDEA 2020.1 Build #IU-201.6668.121,built on April 8,2020
-tomcat 8.0.36
-jdk 1.8.0_162
-eclipse 2023
+* 环境版本：tomcat 8.0.36、jdk 1.8.0_162、IDEA 2020.1 Build #IU-201.6668.121,built on April 8,2020、eclipse 2023
+* 技术框架：J2EE
+* 业务场景：项目交接、维护改造调试
+
+## 问题描述
+
+原本项目使用eclipse开发调试，但是其调试功能不够全面，运行参数也不方便调整，所以需要把项目转移到idea平台，同时在git代码管理方面也更方便。
 
 ## 解决方案
 
